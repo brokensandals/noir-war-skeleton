@@ -1,0 +1,31 @@
+<%- rename "../#{param(:project_name).sub('-','_')}/server.clj" -%>
+(ns <%= param :project_name %>.server
+  (:require [noir.server :as server])
+  (:use hiccup.core
+        hiccup.middleware
+        hiccup.page-helpers
+        noir.core))
+
+(defpartial layout [& content]
+  (html5
+    [:head
+      [:title "<%= param :project_name %>"]
+      <%- if param(:coffeescript) == 'y' -%>
+      [:script {:type "text/coffeescript" :src (url "/main.coffee")}]
+      (include-js "https://raw.github.com/jashkenas/coffee-script/9abe614ea85206d54ac058c27d2bc08c1cfe2365/extras/coffee-script.js")
+      <%- end -%>
+      <%- if param(:less) == 'y' -%>
+      [:link {:rel "stylesheet/less" :type "text/css" :href (url "/main.less")}]
+      (include-js "https://raw.github.com/cloudhead/less.js/master/dist/less-1.2.2.min.js")<%- end -%>]
+    [:body
+      [:div#content content]]))
+
+(defpage "/" []
+  (layout
+    "TODO"))
+
+(server/add-middleware wrap-base-url)
+
+(def handler
+  (server/gen-handler {:mode :prod
+                       :ns '<%= param :project_name %>}))
